@@ -1,6 +1,8 @@
 use std::fs::File;
 use std::io::Write;
 
+mod vec3;
+
 fn main() {
     let img_format = "P3";
     let img_width: u32 = 256;
