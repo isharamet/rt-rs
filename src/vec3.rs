@@ -43,6 +43,10 @@ impl Vec3 {
     pub fn length(&self) -> f32 {
         self.length_squared().sqrt()
     }
+
+    pub fn unit_direction(&self) -> Vec3 {
+        *self / self.length()
+    }
 }
 
 impl ops::Add<Vec3> for Vec3 {
@@ -161,5 +165,15 @@ mod tests {
     fn test_length() {
         let v = Vec3::new(0.0, 0.0, 2.0);
         assert_eq!(v.length(), 2.0);
+    }
+
+    #[test]
+    fn test_unit_direction() {
+        let v1 = Vec3::new(10.0, 0.0, 0.0);
+        let v2 = Vec3::new(0.0, 20.0, 0.0);
+        let v3 = Vec3::new(0.0, 0.0, 30.0);
+        assert_eq!(v1.unit_direction(), Vec3::new(1.0, 0.0, 0.0));
+        assert_eq!(v2.unit_direction(), Vec3::new(0.0, 1.0, 0.0));
+        assert_eq!(v3.unit_direction(), Vec3::new(0.0, 0.0, 1.0));
     }
 }
