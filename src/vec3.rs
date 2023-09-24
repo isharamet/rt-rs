@@ -44,7 +44,7 @@ impl Vec3 {
         self.length_squared().sqrt()
     }
 
-    pub fn unit_direction(&self) -> Vec3 {
+    pub fn unit_vector(&self) -> Vec3 {
         *self / self.length()
     }
 }
@@ -172,8 +172,8 @@ mod tests {
         let v1 = Vec3::new(10.0, 0.0, 0.0);
         let v2 = Vec3::new(0.0, 20.0, 0.0);
         let v3 = Vec3::new(0.0, 0.0, 30.0);
-        assert_eq!(v1.unit_direction(), Vec3::new(1.0, 0.0, 0.0));
-        assert_eq!(v2.unit_direction(), Vec3::new(0.0, 1.0, 0.0));
-        assert_eq!(v3.unit_direction(), Vec3::new(0.0, 0.0, 1.0));
+        assert_eq!(v1.unit_vector(), Vec3::new(1.0, 0.0, 0.0));
+        assert_eq!(v2.unit_vector(), Vec3::new(0.0, 1.0, 0.0));
+        assert_eq!(v3.unit_vector(), Vec3::new(0.0, 0.0, 1.0));
     }
 }

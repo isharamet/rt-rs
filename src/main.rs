@@ -6,11 +6,32 @@ use std::io::Write;
 mod ray;
 mod vec3;
 
-fn ray_color(ray: Ray) -> Vec3 {
-    let unit_direction = ray.direction.unit_direction();
-    let a: f32 = 0.5 * (unit_direction.y() + 1.0);
+fn hit_sphere(center: Vec3, radius: f32, ray: &Ray) -> f32 {
+    let oc = ray.origin - center;
+    let a = ray.direction.dot(ray.direction);
+    let b = 2.0 * oc.dot(ray.direction);
+    let c = oc.dot(oc) - radius * radius;
+    let discriminant = b * b - 4.0 * a * c;
 
-    (1.0 - a) * Vec3::new(1.0, 1.0, 1.0) + a * Vec3::new(0.5, 0.7, 1.0)
+    if discriminant < 0.0 {
+        -1.0
+    } else {
+        (-b - discriminant.sqrt()) / (2.0 * a)
+    }
+}
+
+fn ray_color(ray: &Ray) -> Vec3 {
+    let c = Vec3::new(0.0, 0.0, -1.0);
+    let t = hit_sphere(c, 0.5, ray);
+    if t > 0.0 {
+        let n = (ray.point_at(t) - c).unit_vector();
+        0.5 * Vec3::new(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0)
+    } else {
+        let unit_direction = ray.direction.unit_vector();
+        let a: f32 = 0.5 * (unit_direction.y() + 1.0);
+
+        (1.0 - a) * Vec3::new(1.0, 1.0, 1.0) + a * Vec3::new(0.5, 0.7, 1.0)
+    }
 }
 
 fn color_str(color: Vec3) -> String {
@@ -62,7 +83,7 @@ fn main() {
             let pixel_center = pixel00_loc + (i as f32 * pixel_u) + (j as f32 * pixel_v);
             let ray_direction = pixel_center - camera_center;
             let ray = Ray::new(camera_center, ray_direction);
-            let color = ray_color(ray);
+            let color = ray_color(&ray);
 
             file.write(color_str(color).as_bytes())
                 .expect("Unable to write to file");
