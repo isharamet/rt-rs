@@ -61,6 +61,14 @@ impl ops::Add<Vec3> for Vec3 {
     }
 }
 
+impl ops::Neg for Vec3 {
+    type Output = Self;
+
+    fn neg(self) -> Self {
+        Vec3::new(-self.e[0], -self.e[1], -self.e[2])
+    }
+}
+
 impl ops::Sub<Vec3> for Vec3 {
     type Output = Vec3;
 
@@ -119,6 +127,13 @@ mod tests {
         let v2 = Vec3::new(4.0, 5.0, 6.0);
         assert_eq!(v1 + v2, Vec3::new(5.0, 7.0, 9.0));
     }
+
+    #[test]
+    fn test_neg() {
+        let v = Vec3::new(1.0, 2.0, 3.0);
+        assert_eq!(-v, Vec3::new(-1.0, -2.0, -3.0));
+    }
+
     #[test]
     fn test_sub() {
         let v1 = Vec3::new(1.0, 2.0, 3.0);

@@ -1,4 +1,5 @@
 use crate::hitable::{HitRecord, Hitable};
+use crate::ray::Ray;
 use crate::vec3::Vec3;
 
 pub struct Sphere {
@@ -6,8 +7,28 @@ pub struct Sphere {
     pub radius: f32,
 }
 
+impl Sphere {
+    fn hit_record(&self, ray: &Ray, t: f32) -> HitRecord {
+        let point = ray.point_at(t);
+        let outward_normal = (point - self.center) / self.radius;
+        let front_face = ray.direction.dot(outward_normal) < 0.0;
+        let normal = if front_face {
+            outward_normal
+        } else {
+            -outward_normal
+        };
+
+        HitRecord {
+            point,
+            normal,
+            t,
+            front_face,
+        }
+    }
+}
+
 impl Hitable for Sphere {
-    fn hit(&self, ray: &crate::ray::Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
         let mut result: Option<HitRecord> = None;
 
         let oc = ray.origin - self.center;
@@ -24,22 +45,10 @@ impl Hitable for Sphere {
                 t = (-half_b + sqrt_d) / a;
 
                 if t > t_min && t < t_max {
-                    let p = ray.point_at(t);
-
-                    result = Some(HitRecord {
-                        point: p,
-                        normal: (p - self.center) / self.radius,
-                        t,
-                    });
+                    result = Some(self.hit_record(ray, t));
                 }
             } else {
-                let p = ray.point_at(t);
-
-                result = Some(HitRecord {
-                    point: p,
-                    normal: (p - self.center) / self.radius,
-                    t,
-                });
+                result = Some(self.hit_record(ray, t));
             }
         }
 

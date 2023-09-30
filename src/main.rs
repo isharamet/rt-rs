@@ -11,20 +11,9 @@ mod ray;
 mod sphere;
 mod vec3;
 
-fn ray_color(ray: &Ray) -> Vec3 {
-    let sphere = Sphere {
-        center: Vec3::new(0.0, 0.0, -1.0),
-        radius: 0.5,
-    };
-
-    match sphere.hit(ray, 0.0, 1.0) {
-        Some(hit_rec) => {
-            0.5 * Vec3::new(
-                hit_rec.normal.x() + 1.0,
-                hit_rec.normal.y() + 1.0,
-                hit_rec.normal.z() + 1.0,
-            )
-        }
+fn ray_color(ray: &Ray, world: &Vec<Box<dyn Hitable>>) -> Vec3 {
+    match world.hit(ray, 0.0, f32::INFINITY) {
+        Some(hit_rec) => 0.5 * (hit_rec.normal + Vec3::new(1.0, 1.0, 1.0)),
         None => {
             let unit_direction = ray.direction.unit_vector();
             let a: f32 = 0.5 * (unit_direction.y() + 1.0);
@@ -44,12 +33,26 @@ fn color_str(color: Vec3) -> String {
 }
 
 fn main() {
+    // Image
     let img_format = "P3";
 
     let aspect_ratio = 16.0 / 9.0;
     let img_width: u32 = 400;
     let img_height: u32 = (img_width as f32 / aspect_ratio) as u32;
 
+    // World
+    let world: Vec<Box<dyn Hitable>> = vec![
+        Box::new(Sphere {
+            center: Vec3::new(0.0, 0.0, -1.0),
+            radius: 0.5,
+        }),
+        Box::new(Sphere {
+            center: Vec3::new(0.0, 100.5, -1.0),
+            radius: 100.0,
+        }),
+    ];
+
+    // Camera
     let focal_length: f32 = 1.0;
     let viewport_height: f32 = 2.0;
     let viewport_width: f32 = viewport_height * (img_width as f32 / img_height as f32);
@@ -83,7 +86,7 @@ fn main() {
             let pixel_center = pixel00_loc + (i as f32 * pixel_u) + (j as f32 * pixel_v);
             let ray_direction = pixel_center - camera_center;
             let ray = Ray::new(camera_center, ray_direction);
-            let color = ray_color(&ray);
+            let color = ray_color(&ray, &world);
 
             file.write(color_str(color).as_bytes())
                 .expect("Unable to write to file");
