@@ -1,18 +1,20 @@
-use hitable::Hitable;
+use hittable::Hittable;
 
+use crate::interval::Interval;
 use crate::ray::Ray;
 use crate::sphere::Sphere;
 use crate::vec3::Vec3;
 use std::fs::File;
 use std::io::Write;
 
-mod hitable;
+mod hittable;
+mod interval;
 mod ray;
 mod sphere;
 mod vec3;
 
-fn ray_color(ray: &Ray, world: &Vec<Box<dyn Hitable>>) -> Vec3 {
-    match world.hit(ray, 0.0, f32::INFINITY) {
+fn ray_color(ray: &Ray, world: &Vec<Box<dyn Hittable>>) -> Vec3 {
+    match world.hit(ray, Interval::new(0.0, f32::INFINITY)) {
         Some(hit_rec) => 0.5 * (hit_rec.normal + Vec3::new(1.0, 1.0, 1.0)),
         None => {
             let unit_direction = ray.direction.unit_vector();
@@ -41,7 +43,7 @@ fn main() {
     let img_height: u32 = (img_width as f32 / aspect_ratio) as u32;
 
     // World
-    let world: Vec<Box<dyn Hitable>> = vec![
+    let world: Vec<Box<dyn Hittable>> = vec![
         Box::new(Sphere {
             center: Vec3::new(0.0, 0.0, -1.0),
             radius: 0.5,
