@@ -13,7 +13,8 @@ mod vec3;
 fn main() {
     let aspect_ratio = 16.0 / 9.0;
     let img_width: u32 = 400;
-    let camera = Camera::new(aspect_ratio, img_width);
+    let samples_per_pixel = 100;
+    let camera = Camera::new(aspect_ratio, img_width, samples_per_pixel);
 
     let world: Vec<Box<dyn Hittable>> = vec![
         Box::new(Sphere {
