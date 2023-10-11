@@ -3,11 +3,11 @@ use std::ops;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct Vec3 {
-    pub e: [f32; 3],
+    pub e: [f64; 3],
 }
 
 impl Vec3 {
-    pub fn new(x: f32, y: f32, z: f32) -> Vec3 {
+    pub fn new(x: f64, y: f64, z: f64) -> Vec3 {
         Vec3 { e: [x, y, z] }
     }
 
@@ -17,7 +17,7 @@ impl Vec3 {
         }
     }
 
-    pub fn random_in_range(min: f32, max: f32) -> Vec3 {
+    pub fn random_in_range(min: f64, max: f64) -> Vec3 {
         Vec3 {
             e: [
                 rng::random_in_range(min, max),
@@ -45,23 +45,24 @@ impl Vec3 {
             -on_unit_sphere
         }
     }
+
     pub fn random_unit_vector() -> Vec3 {
         Vec3::random_in_unit_sphere().unit_vector()
     }
 
-    pub fn x(&self) -> f32 {
+    pub fn x(&self) -> f64 {
         self.e[0]
     }
 
-    pub fn y(&self) -> f32 {
+    pub fn y(&self) -> f64 {
         self.e[1]
     }
 
-    pub fn z(&self) -> f32 {
+    pub fn z(&self) -> f64 {
         self.e[2]
     }
 
-    pub fn dot(&self, other: Vec3) -> f32 {
+    pub fn dot(&self, other: Vec3) -> f64 {
         self.e[0] * other.e[0] + self.e[1] * other.e[1] + self.e[2] * other.e[2]
     }
 
@@ -75,11 +76,11 @@ impl Vec3 {
         }
     }
 
-    pub fn length_squared(&self) -> f32 {
+    pub fn length_squared(&self) -> f64 {
         self.e[0] * self.e[0] + self.e[1] * self.e[1] + self.e[2] * self.e[2]
     }
 
-    pub fn length(&self) -> f32 {
+    pub fn length(&self) -> f64 {
         self.length_squared().sqrt()
     }
 
@@ -132,7 +133,7 @@ impl ops::Mul<Vec3> for Vec3 {
     }
 }
 
-impl ops::Mul<Vec3> for f32 {
+impl ops::Mul<Vec3> for f64 {
     type Output = Vec3;
 
     fn mul(self, other: Vec3) -> Vec3 {
@@ -140,18 +141,18 @@ impl ops::Mul<Vec3> for f32 {
     }
 }
 
-impl ops::Mul<f32> for Vec3 {
+impl ops::Mul<f64> for Vec3 {
     type Output = Vec3;
 
-    fn mul(self, other: f32) -> Vec3 {
+    fn mul(self, other: f64) -> Vec3 {
         Vec3::new(other * self.e[0], other * self.e[1], other * self.e[2])
     }
 }
 
-impl ops::Div<f32> for Vec3 {
+impl ops::Div<f64> for Vec3 {
     type Output = Vec3;
 
-    fn div(self, other: f32) -> Vec3 {
+    fn div(self, other: f64) -> Vec3 {
         Vec3::new(self.e[0] / other, self.e[1] / other, self.e[2] / other)
     }
 }
