@@ -1,8 +1,8 @@
 use crate::hittable::Hittable;
 use crate::interval::Interval;
 use crate::ray::Ray;
+use crate::rng;
 use crate::vec3::Vec3;
-use fastrand;
 use std::fs::File;
 use std::io::Write;
 
@@ -51,7 +51,10 @@ impl Camera {
 
     fn ray_color(ray: &Ray, world: &Vec<Box<dyn Hittable>>) -> Vec3 {
         match world.hit(ray, Interval::new(0.0, f32::INFINITY)) {
-            Some(hit_rec) => 0.5 * (hit_rec.normal + Vec3::new(1.0, 1.0, 1.0)),
+            Some(hit_rec) => {
+                let direction = Vec3::random_on_hemisphere(hit_rec.normal);
+                0.5 * Camera::ray_color(&Ray::new(hit_rec.point, direction), world)
+            }
             None => {
                 let unit_direction = ray.direction.unit_vector();
                 let a: f32 = 0.5 * (unit_direction.y() + 1.0);
@@ -82,8 +85,8 @@ impl Camera {
     }
 
     fn pixel_sample_square(&self) -> Vec3 {
-        let px = -0.5 + fastrand::f32();
-        let py = -0.5 + fastrand::f32();
+        let px = -0.5 + rng::random();
+        let py = -0.5 + rng::random();
         return (px * self.pixel_delta_u) + (py * self.pixel_delta_v);
     }
 
@@ -116,7 +119,7 @@ impl Camera {
             for i in 0..self.img_width {
                 let mut pixel_color = Vec3::new(0.0, 0.0, 0.0);
 
-                for sample in 0..self.samples_per_pixel {
+                for _ in 0..self.samples_per_pixel {
                     let ray = self.get_ray(i, j);
                     pixel_color = pixel_color + Self::ray_color(&ray, &world);
                 }

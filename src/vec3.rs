@@ -1,3 +1,4 @@
+use crate::rng;
 use std::ops;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -8,6 +9,44 @@ pub struct Vec3 {
 impl Vec3 {
     pub fn new(x: f32, y: f32, z: f32) -> Vec3 {
         Vec3 { e: [x, y, z] }
+    }
+
+    pub fn random() -> Vec3 {
+        Vec3 {
+            e: [rng::random(), rng::random(), rng::random()],
+        }
+    }
+
+    pub fn random_in_range(min: f32, max: f32) -> Vec3 {
+        Vec3 {
+            e: [
+                rng::random_in_range(min, max),
+                rng::random_in_range(min, max),
+                rng::random_in_range(min, max),
+            ],
+        }
+    }
+
+    pub fn random_in_unit_sphere() -> Vec3 {
+        loop {
+            let vec = Vec3::random_in_range(-1.0, 1.0);
+
+            if vec.length_squared() < 1.0 {
+                break vec;
+            }
+        }
+    }
+
+    pub fn random_on_hemisphere(normal: Vec3) -> Vec3 {
+        let on_unit_sphere = Vec3::random_unit_vector();
+        if on_unit_sphere.dot(normal) > 0.0 {
+            on_unit_sphere
+        } else {
+            -on_unit_sphere
+        }
+    }
+    pub fn random_unit_vector() -> Vec3 {
+        Vec3::random_in_unit_sphere().unit_vector()
     }
 
     pub fn x(&self) -> f32 {

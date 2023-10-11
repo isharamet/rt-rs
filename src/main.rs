@@ -7,6 +7,7 @@ mod camera;
 mod hittable;
 mod interval;
 mod ray;
+mod rng;
 mod sphere;
 mod vec3;
 
