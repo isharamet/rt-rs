@@ -5,11 +5,11 @@ use crate::vec3::Vec3;
 
 pub struct Sphere {
     pub center: Vec3,
-    pub radius: f64,
+    pub radius: f32,
 }
 
 impl Sphere {
-    fn hit_record(&self, ray: &Ray, t: f64) -> HitRecord {
+    fn hit_record(&self, ray: &Ray, t: f32) -> HitRecord {
         let point = ray.point_at(t);
         let outward_normal = (point - self.center) / self.radius;
         let front_face = ray.direction.dot(outward_normal) < 0.0;
