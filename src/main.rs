@@ -1,17 +1,8 @@
-use crate::camera::Camera;
-use crate::hittable::Hittable;
-use crate::material::{Lambertian, Material, Metal};
-use crate::sphere::Sphere;
-use crate::vec3::Vec3;
-
-mod camera;
-mod hittable;
-mod interval;
-mod material;
-mod ray;
-mod rng;
-mod sphere;
-mod vec3;
+use rt_rs::camera::Camera;
+use rt_rs::hittable::Hittable;
+use rt_rs::material::{Lambertian, Material, Metal};
+use rt_rs::sphere::Sphere;
+use rt_rs::vec3::Vec3;
 
 fn main() {
     let aspect_ratio = 16.0 / 9.0;
