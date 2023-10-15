@@ -1,5 +1,6 @@
 use crate::hittable::Hittable;
 use crate::interval::Interval;
+use crate::material::Scatterable;
 use crate::ray::Ray;
 use crate::rng;
 use crate::vec3::Vec3;
@@ -16,6 +17,10 @@ pub struct Camera {
     pixel00_loc: Vec3,
     pixel_delta_u: Vec3,
     pixel_delta_v: Vec3,
+}
+
+fn linear_to_gamma(linear: f32) -> f32 {
+    linear.sqrt()
 }
 
 impl Camera {
@@ -58,13 +63,15 @@ impl Camera {
 
     fn ray_color(ray: &Ray, depth: u32, world: &Vec<Box<dyn Hittable>>) -> Vec3 {
         if depth <= 0 {
-            Vec3::new(0.0, 0.0, 0.0)
+            Vec3::zero()
         } else {
             match world.hit(ray, Interval::new(0.001, f32::INFINITY)) {
-                Some(hit_rec) => {
-                    let direction = Vec3::random_on_hemisphere(hit_rec.normal);
-                    0.5 * Camera::ray_color(&Ray::new(hit_rec.point, direction), depth - 1, world)
-                }
+                Some(hit_rec) => match hit_rec.material.scatter(&ray, &hit_rec) {
+                    Some(scattered) => {
+                        scattered.attenuation * Camera::ray_color(&scattered.ray, depth - 1, world)
+                    }
+                    None => Vec3::zero(),
+                },
                 None => {
                     let unit_direction = ray.direction.unit_vector();
                     let a: f32 = 0.5 * (unit_direction.y() + 1.0);
@@ -78,9 +85,9 @@ impl Camera {
     fn write_color(&self, mut file: &File, color: Vec3) {
         let scale = 1.0 / self.samples_per_pixel as f32;
 
-        let r = color.x() * scale;
-        let g = color.y() * scale;
-        let b = color.z() * scale;
+        let r = linear_to_gamma(color.x() * scale);
+        let g = linear_to_gamma(color.y() * scale);
+        let b = linear_to_gamma(color.z() * scale);
 
         let intensity = Interval::new(0.0, 0.999);
 

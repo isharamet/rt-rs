@@ -1,23 +1,19 @@
 use crate::interval::Interval;
+use crate::material::Material;
 use crate::ray::Ray;
 use crate::vec3::Vec3;
 
 #[derive(Clone, Copy)]
-pub struct HitRecord {
+pub struct HitRecord<'a> {
     pub point: Vec3,
     pub normal: Vec3,
+    pub material: &'a Material,
     pub t: f32,
     pub front_face: bool,
 }
 
 pub trait Hittable {
     fn hit(&self, ray: &Ray, ray_t: Interval) -> Option<HitRecord>;
-}
-
-impl Hittable for HitRecord {
-    fn hit(&self, ray: &Ray, ray_t: Interval) -> Option<HitRecord> {
-        None
-    }
 }
 
 impl Hittable for Vec<Box<dyn Hittable>> {

@@ -6,9 +6,15 @@ pub struct Vec3 {
     pub e: [f32; 3],
 }
 
+const ZERO: Vec3 = Vec3 { e: [0.0, 0.0, 0.0] };
+
 impl Vec3 {
     pub fn new(x: f32, y: f32, z: f32) -> Vec3 {
         Vec3 { e: [x, y, z] }
+    }
+
+    pub fn zero() -> Vec3 {
+        ZERO
     }
 
     pub fn random() -> Vec3 {
@@ -50,6 +56,10 @@ impl Vec3 {
         Vec3::random_in_unit_sphere().unit_vector()
     }
 
+    pub fn reflect(vec: Vec3, normal: Vec3) -> Vec3 {
+        vec - 2.0 * vec.dot(normal) * normal
+    }
+
     pub fn x(&self) -> f32 {
         self.e[0]
     }
@@ -86,6 +96,11 @@ impl Vec3 {
 
     pub fn unit_vector(&self) -> Vec3 {
         *self / self.length()
+    }
+
+    pub fn near_zero(&self) -> bool {
+        let s: f32 = 1e-8;
+        self.e[0].abs() < s && self.e[1].abs() < s && self.e[2].abs() < s
     }
 }
 
@@ -230,5 +245,17 @@ mod tests {
         assert_eq!(v1.unit_vector(), Vec3::new(1.0, 0.0, 0.0));
         assert_eq!(v2.unit_vector(), Vec3::new(0.0, 1.0, 0.0));
         assert_eq!(v3.unit_vector(), Vec3::new(0.0, 0.0, 1.0));
+    }
+
+    #[test]
+    fn test_near_zero() {
+        let v1 = Vec3::new(1e-9, 1e-9, 1e-9);
+        let v2 = Vec3::new(1e-8, 1e-8, 1e-8);
+        let v3 = Vec3::new(1e-9, -1e-9, 1e-9);
+        let v4 = Vec3::new(-1e-8, 1e-8, -1e-8);
+        assert_eq!(v1.near_zero(), true);
+        assert_eq!(v2.near_zero(), false);
+        assert_eq!(v3.near_zero(), true);
+        assert_eq!(v4.near_zero(), false);
     }
 }

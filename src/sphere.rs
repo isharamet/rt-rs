@@ -1,15 +1,25 @@
 use crate::hittable::{HitRecord, Hittable};
 use crate::interval::Interval;
+use crate::material::Material;
 use crate::ray::Ray;
 use crate::vec3::Vec3;
 
 pub struct Sphere {
-    pub center: Vec3,
-    pub radius: f32,
+    center: Vec3,
+    radius: f32,
+    material: Material,
 }
 
 impl Sphere {
-    fn hit_record(&self, ray: &Ray, t: f32) -> HitRecord {
+    pub fn new(center: Vec3, radius: f32, material: Material) -> Sphere {
+        Sphere {
+            center,
+            radius,
+            material,
+        }
+    }
+
+    pub fn hit_record(&self, ray: &Ray, t: f32) -> HitRecord {
         let point = ray.point_at(t);
         let outward_normal = (point - self.center) / self.radius;
         let front_face = ray.direction.dot(outward_normal) < 0.0;
@@ -22,6 +32,7 @@ impl Sphere {
         HitRecord {
             point,
             normal,
+            material: &self.material,
             t,
             front_face,
         }
