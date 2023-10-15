@@ -24,6 +24,7 @@ impl Scatterable for Material {
         }
     }
 }
+
 #[derive(Clone, Copy)]
 pub struct Lambertian {
     pub albedo: Vec3,
@@ -46,12 +47,16 @@ impl Scatterable for Lambertian {
 #[derive(Clone, Copy)]
 pub struct Metal {
     pub albedo: Vec3,
+    pub fuzz: f32,
 }
 
 impl Scatterable for Metal {
     fn scatter(&self, ray_in: &Ray, hit_rec: &HitRecord) -> Option<Scatter> {
         let direction = Vec3::reflect(ray_in.direction.unit_vector(), hit_rec.normal);
-        let ray = Ray::new(hit_rec.point, direction);
+        let ray = Ray::new(
+            hit_rec.point,
+            direction + self.fuzz * Vec3::random_unit_vector(),
+        );
         Some(Scatter {
             attenuation: self.albedo,
             ray,

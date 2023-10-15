@@ -28,9 +28,11 @@ fn main() {
     });
     let m_left = Material::Metal(Metal {
         albedo: Vec3::new(0.8, 0.8, 0.8),
+        fuzz: 0.3,
     });
     let m_right = Material::Metal(Metal {
         albedo: Vec3::new(0.8, 0.6, 0.2),
+        fuzz: 1.0,
     });
 
     let world: Vec<Box<dyn Hittable>> = vec![
