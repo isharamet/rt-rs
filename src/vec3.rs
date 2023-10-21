@@ -60,6 +60,13 @@ impl Vec3 {
         vec - 2.0 * vec.dot(normal) * normal
     }
 
+    pub fn refract(vec: Vec3, normal: Vec3, etai_over_etat: f32) -> Vec3 {
+        let cos_theta = f32::min((-vec).dot(normal), 1.0);
+        let r_out_perp = etai_over_etat * (vec + cos_theta * normal);
+        let r_out_par = -(1.0 - r_out_perp.length_squared()).abs().sqrt() * normal;
+        r_out_perp + r_out_par
+    }
+
     pub fn x(&self) -> f32 {
         self.e[0]
     }
