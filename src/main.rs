@@ -9,8 +9,21 @@ fn main() {
     let img_width: u32 = 400;
     let samples_per_pixel = 100;
     let max_depth = 50;
-    let fov = 120;
-    let camera = Camera::new(aspect_ratio, img_width, samples_per_pixel, max_depth, fov);
+    let fov = 90;
+    let lookfrom = Vec3::new(-2.0, 2.0, 1.0);
+    let lookat = Vec3::new(0.0, 0.0, -1.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+
+    let camera = Camera::new(
+        aspect_ratio,
+        img_width,
+        samples_per_pixel,
+        max_depth,
+        fov,
+        lookfrom,
+        lookat,
+        vup,
+    );
 
     let m_ground = Material::Lambertian(Lambertian {
         albedo: Vec3::new(0.8, 0.8, 0.0),
@@ -25,8 +38,8 @@ fn main() {
     });
 
     let world: Vec<Box<dyn Hittable>> = vec![
-        Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, m_center)),
         Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0, m_ground)),
+        Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, m_center)),
         Box::new(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), 0.5, m_left)),
         Box::new(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), -0.4, m_left)),
         Box::new(Sphere::new(Vec3::new(1.0, 0.0, -1.0), 0.5, m_right)),

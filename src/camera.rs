@@ -13,11 +13,17 @@ pub struct Camera {
     pub samples_per_pixel: u32,
     pub max_depth: u32,
     pub fov: u32,
+    pub lookfrom: Vec3,
+    pub lookat: Vec3,
+    pub vup: Vec3,
     img_height: u32,
     center: Vec3,
     pixel00_loc: Vec3,
     pixel_delta_u: Vec3,
     pixel_delta_v: Vec3,
+    u: Vec3,
+    v: Vec3,
+    w: Vec3,
 }
 
 fn linear_to_gamma(linear: f32) -> f32 {
@@ -31,24 +37,31 @@ impl Camera {
         samples_per_pixel: u32,
         max_depth: u32,
         fov: u32,
+        lookfrom: Vec3,
+        lookat: Vec3,
+        vup: Vec3,
     ) -> Camera {
         let img_height: u32 = (img_width as f32 / aspect_ratio) as u32;
 
-        let focal_length: f32 = 1.0;
+        let center = lookfrom;
+
+        let focal_length: f32 = (lookfrom - lookat).length();
         let theta = (fov as f32).to_radians();
         let h = (theta / 2.0).tan();
         let viewport_height: f32 = 2.0 * h * focal_length;
         let viewport_width: f32 = viewport_height * (img_width as f32 / img_height as f32);
-        let center = Vec3::new(0.0, 0.0, 0.0);
 
-        let viewport_u = Vec3::new(viewport_width, 0.0, 0.0);
-        let viewport_v = Vec3::new(0.0, -viewport_height, 0.0);
+        let w = (lookfrom - lookat).unit_vector();
+        let u = vup.cross(w).unit_vector();
+        let v = w.cross(u);
 
-        let pixel_delta_u = viewport_u / (img_width as f32);
-        let pixel_delta_v = viewport_v / (img_height as f32);
+        let viewport_u = viewport_width * u;
+        let viewport_v = viewport_height * -v;
 
-        let viewport_upper_left =
-            center - Vec3::new(0.0, 0.0, focal_length) - viewport_u / 2.0 - viewport_v / 2.0;
+        let pixel_delta_u = viewport_u / img_width as f32;
+        let pixel_delta_v = viewport_v / img_height as f32;
+
+        let viewport_upper_left = center - (focal_length * w) - viewport_u / 2.0 - viewport_v / 2.0;
 
         let pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_u);
 
@@ -59,10 +72,16 @@ impl Camera {
             img_height,
             max_depth,
             fov,
+            lookfrom,
+            lookat,
+            vup,
             center,
             pixel00_loc,
             pixel_delta_u,
             pixel_delta_v,
+            u,
+            v,
+            w,
         }
     }
 
