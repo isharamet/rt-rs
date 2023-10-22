@@ -9,7 +9,8 @@ fn main() {
     let img_width: u32 = 400;
     let samples_per_pixel = 100;
     let max_depth = 50;
-    let camera = Camera::new(aspect_ratio, img_width, samples_per_pixel, max_depth);
+    let fov = 120;
+    let camera = Camera::new(aspect_ratio, img_width, samples_per_pixel, max_depth, fov);
 
     let m_ground = Material::Lambertian(Lambertian {
         albedo: Vec3::new(0.8, 0.8, 0.0),
