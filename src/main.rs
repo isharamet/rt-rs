@@ -46,19 +46,17 @@ fn main() {
             );
 
             if (center - Vec3::new(4.0, 0.2, 0.0)).length() > 0.9 {
-                if choose_material < 0.8 {
+                let material = if choose_material < 0.8 {
                     let albedo = Vec3::random();
-                    let material = Material::Lambertian(Lambertian { albedo });
-                    world.push(Box::new(Sphere::new(center, 0.2, material)));
+                    Material::Lambertian(Lambertian { albedo })
                 } else if choose_material < 0.95 {
                     let albedo = Vec3::random_in_range(0.5, 1.0);
                     let fuzz = rng::random_in_range(0.0, 0.5);
-                    let material = Material::Metal(Metal { albedo, fuzz });
-                    world.push(Box::new(Sphere::new(center, 0.2, material)));
+                    Material::Metal(Metal { albedo, fuzz })
                 } else {
-                    let material = Material::Dielectric(Dielectric { ir: 1.5 });
-                    world.push(Box::new(Sphere::new(center, 0.2, material)));
-                }
+                    Material::Dielectric(Dielectric { ir: 1.5 })
+                };
+                world.push(Box::new(Sphere::new(center, 0.2, material)));
             }
         }
     }
