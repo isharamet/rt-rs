@@ -12,7 +12,7 @@ pub struct HitRecord<'a> {
     pub front_face: bool,
 }
 
-pub trait Hittable {
+pub trait Hittable: Sync {
     fn hit(&self, ray: &Ray, ray_t: Interval) -> Option<HitRecord>;
 }
 

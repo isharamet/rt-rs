@@ -6,12 +6,17 @@ use rt_rs::sphere::Sphere;
 use rt_rs::vec3::Vec3;
 
 fn main() {
+    rayon::ThreadPoolBuilder::new()
+        .num_threads(16)
+        .build_global()
+        .unwrap();
+
     let mut world: Vec<Box<dyn Hittable>> = Vec::new();
 
     let camera = CameraBuilder::new()
         .aspect_ratio(16.0 / 9.0)
         .img_width(1200)
-        .samples_per_pixel(500)
+        .samples_per_pixel(100)
         .max_depth(50)
         .fov(20)
         .lookfrom(Vec3::new(13.0, 2.0, 3.0))

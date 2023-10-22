@@ -4,6 +4,7 @@ use crate::material::Scatterable;
 use crate::ray::Ray;
 use crate::rng;
 use crate::vec3::Vec3;
+use rayon::prelude::*;
 use std::fs::File;
 use std::io::Write;
 
@@ -235,6 +236,17 @@ impl Camera {
         Ray::new(ray_origin, ray_direction)
     }
 
+    fn pixel_color(&self, world: &Vec<Box<dyn Hittable>>, i: u32, j: u32) -> Vec3 {
+        let mut pixel_color = Vec3::new(0.0, 0.0, 0.0);
+
+        for _ in 0..self.samples_per_pixel {
+            let ray = self.get_ray(i, j);
+            pixel_color = pixel_color + Self::ray_color(&ray, self.max_depth, world);
+        }
+
+        pixel_color
+    }
+
     pub fn render(&self, world: &Vec<Box<dyn Hittable>>) {
         let img_format = "P3";
         let max_colors: u32 = 255;
@@ -248,18 +260,18 @@ impl Camera {
         )
         .expect("Unable to write to file");
 
-        for j in 0..self.img_height {
-            print!("\rScanlines remaining: {}", self.img_height - j);
-            for i in 0..self.img_width {
-                let mut pixel_color = Vec3::new(0.0, 0.0, 0.0);
+        let img: Vec<Vec3> = (0..self.img_height)
+            .collect::<Vec<u32>>()
+            .par_iter()
+            .flat_map(|j| {
+                (0..self.img_width)
+                    .collect::<Vec<u32>>()
+                    .iter()
+                    .map(|i| self.pixel_color(&world, *i, *j))
+                    .collect::<Vec<Vec3>>()
+            })
+            .collect();
 
-                for _ in 0..self.samples_per_pixel {
-                    let ray = self.get_ray(i, j);
-                    pixel_color = pixel_color + Self::ray_color(&ray, self.max_depth, &world);
-                }
-
-                self.write_color(&file, pixel_color);
-            }
-        }
+        img.iter().for_each(|color| self.write_color(&file, *color));
     }
 }
