@@ -16,6 +16,8 @@ pub struct Camera {
     pub lookfrom: Vec3,
     pub lookat: Vec3,
     pub vup: Vec3,
+    pub defocus_angle: f32,
+    pub focus_dist: f32,
     img_height: u32,
     center: Vec3,
     pixel00_loc: Vec3,
@@ -24,57 +26,130 @@ pub struct Camera {
     u: Vec3,
     v: Vec3,
     w: Vec3,
+    defocus_disk_u: Vec3,
+    defocus_disk_v: Vec3,
 }
 
-fn linear_to_gamma(linear: f32) -> f32 {
-    linear.sqrt()
+pub struct CameraBuilder {
+    pub aspect_ratio: f32,
+    pub img_width: u32,
+    pub samples_per_pixel: u32,
+    pub max_depth: u32,
+    pub fov: u32,
+    pub lookfrom: Vec3,
+    pub lookat: Vec3,
+    pub vup: Vec3,
+    pub defocus_angle: f32,
+    pub focus_dist: f32,
 }
 
-impl Camera {
-    pub fn new(
-        aspect_ratio: f32,
-        img_width: u32,
-        samples_per_pixel: u32,
-        max_depth: u32,
-        fov: u32,
-        lookfrom: Vec3,
-        lookat: Vec3,
-        vup: Vec3,
-    ) -> Camera {
-        let img_height: u32 = (img_width as f32 / aspect_ratio) as u32;
+impl CameraBuilder {
+    pub fn new() -> CameraBuilder {
+        CameraBuilder {
+            aspect_ratio: 1.0,
+            img_width: 100,
+            samples_per_pixel: 10,
+            max_depth: 10,
+            fov: 90,
+            lookfrom: Vec3::new(0.0, 0.0, -1.0),
+            lookat: Vec3::new(0.0, 0.0, 0.0),
+            vup: Vec3::new(0.0, 1.0, 0.0),
+            defocus_angle: 0.0,
+            focus_dist: 10.0,
+        }
+    }
 
-        let center = lookfrom;
+    pub fn aspect_ratio(mut self, aspect_ratio: f32) -> CameraBuilder {
+        self.aspect_ratio = aspect_ratio;
+        self
+    }
 
-        let focal_length: f32 = (lookfrom - lookat).length();
-        let theta = (fov as f32).to_radians();
+    pub fn img_width(mut self, img_width: u32) -> CameraBuilder {
+        self.img_width = img_width;
+        self
+    }
+
+    pub fn samples_per_pixel(mut self, samples_per_pixel: u32) -> CameraBuilder {
+        self.samples_per_pixel = samples_per_pixel;
+        self
+    }
+
+    pub fn max_depth(mut self, max_depth: u32) -> CameraBuilder {
+        self.max_depth = max_depth;
+        self
+    }
+
+    pub fn fov(mut self, fov: u32) -> CameraBuilder {
+        self.fov = fov;
+        self
+    }
+
+    pub fn lookfrom(mut self, lookfrom: Vec3) -> CameraBuilder {
+        self.lookfrom = lookfrom;
+        self
+    }
+
+    pub fn lookat(mut self, lookat: Vec3) -> CameraBuilder {
+        self.lookat = lookat;
+        self
+    }
+
+    pub fn vup(mut self, vup: Vec3) -> CameraBuilder {
+        self.vup = vup;
+        self
+    }
+
+    pub fn defocus_angle(mut self, defocus_angle: f32) -> CameraBuilder {
+        self.defocus_angle = defocus_angle;
+        self
+    }
+
+    pub fn focus_dist(mut self, focus_dist: f32) -> CameraBuilder {
+        self.focus_dist = focus_dist;
+        self
+    }
+
+    pub fn build(&self) -> Camera {
+        let img_height: u32 = (self.img_width as f32 / self.aspect_ratio) as u32;
+
+        let center = self.lookfrom;
+
+        let theta = (self.fov as f32).to_radians();
         let h = (theta / 2.0).tan();
-        let viewport_height: f32 = 2.0 * h * focal_length;
-        let viewport_width: f32 = viewport_height * (img_width as f32 / img_height as f32);
+        let viewport_height: f32 = 2.0 * h * self.focus_dist;
+        let viewport_width: f32 = viewport_height * (self.img_width as f32 / img_height as f32);
 
-        let w = (lookfrom - lookat).unit_vector();
-        let u = vup.cross(w).unit_vector();
+        let w = (self.lookfrom - self.lookat).unit_vector();
+        let u = self.vup.cross(w).unit_vector();
         let v = w.cross(u);
 
         let viewport_u = viewport_width * u;
         let viewport_v = viewport_height * -v;
 
-        let pixel_delta_u = viewport_u / img_width as f32;
+        let pixel_delta_u = viewport_u / self.img_width as f32;
         let pixel_delta_v = viewport_v / img_height as f32;
 
-        let viewport_upper_left = center - (focal_length * w) - viewport_u / 2.0 - viewport_v / 2.0;
+        let viewport_upper_left =
+            center - (self.focus_dist * w) - viewport_u / 2.0 - viewport_v / 2.0;
 
         let pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_u);
 
+        let defocus_radius = self.focus_dist * (self.defocus_angle / 2.0).to_radians().tan();
+        let defocus_disk_u = u * defocus_radius;
+        let defocus_disk_v = v * defocus_radius;
+
         Camera {
-            aspect_ratio,
-            img_width,
-            samples_per_pixel,
+            aspect_ratio: self.aspect_ratio,
+            img_width: self.img_width,
+            samples_per_pixel: self.samples_per_pixel,
+            max_depth: self.max_depth,
+            fov: self.fov,
+            lookfrom: self.lookat,
+            lookat: self.lookat,
+            vup: self.vup,
+            defocus_angle: self.defocus_angle,
+            focus_dist: self.focus_dist,
             img_height,
-            max_depth,
-            fov,
-            lookfrom,
-            lookat,
-            vup,
             center,
             pixel00_loc,
             pixel_delta_u,
@@ -82,9 +157,17 @@ impl Camera {
             u,
             v,
             w,
+            defocus_disk_u,
+            defocus_disk_v,
         }
     }
+}
 
+fn linear_to_gamma(linear: f32) -> f32 {
+    linear.sqrt()
+}
+
+impl Camera {
     fn ray_color(ray: &Ray, depth: u32, world: &Vec<Box<dyn Hittable>>) -> Vec3 {
         if depth <= 0 {
             Vec3::zero()
@@ -104,6 +187,11 @@ impl Camera {
                 }
             }
         }
+    }
+
+    fn defocus_disk_sample(&self) -> Vec3 {
+        let p = Vec3::random_in_unit_disk();
+        self.center + p.x() * self.defocus_disk_u + p.y() * self.defocus_disk_v
     }
 
     fn write_color(&self, mut file: &File, color: Vec3) {
@@ -137,7 +225,11 @@ impl Camera {
             self.pixel00_loc + (i as f32 * self.pixel_delta_u) + (j as f32 * self.pixel_delta_v);
         let pixel_sample = pixel_center + self.pixel_sample_square();
 
-        let ray_origin = self.center;
+        let ray_origin = if self.defocus_angle < 0.0 {
+            self.center
+        } else {
+            self.defocus_disk_sample()
+        };
         let ray_direction = pixel_sample - ray_origin;
 
         Ray::new(ray_origin, ray_direction)

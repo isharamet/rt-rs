@@ -67,6 +67,20 @@ impl Vec3 {
         r_out_perp + r_out_par
     }
 
+    pub fn random_in_unit_disk() -> Vec3 {
+        loop {
+            let vec = Vec3::new(
+                rng::random_in_range(-1.0, 1.0),
+                rng::random_in_range(-1.0, 1.0),
+                0.0,
+            );
+
+            if vec.length_squared() < 1.0 {
+                break vec;
+            }
+        }
+    }
+
     pub fn x(&self) -> f32 {
         self.e[0]
     }

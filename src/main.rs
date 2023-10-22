@@ -1,29 +1,22 @@
-use rt_rs::camera::Camera;
+use rt_rs::camera::CameraBuilder;
 use rt_rs::hittable::Hittable;
 use rt_rs::material::{Dielectric, Lambertian, Material, Metal};
 use rt_rs::sphere::Sphere;
 use rt_rs::vec3::Vec3;
 
 fn main() {
-    let aspect_ratio = 16.0 / 9.0;
-    let img_width: u32 = 400;
-    let samples_per_pixel = 100;
-    let max_depth = 50;
-    let fov = 90;
-    let lookfrom = Vec3::new(-2.0, 2.0, 1.0);
-    let lookat = Vec3::new(0.0, 0.0, -1.0);
-    let vup = Vec3::new(0.0, 1.0, 0.0);
-
-    let camera = Camera::new(
-        aspect_ratio,
-        img_width,
-        samples_per_pixel,
-        max_depth,
-        fov,
-        lookfrom,
-        lookat,
-        vup,
-    );
+    let camera = CameraBuilder::new()
+        .aspect_ratio(16.0 / 9.0)
+        .img_width(400)
+        .samples_per_pixel(50)
+        .max_depth(50)
+        .fov(20)
+        .lookfrom(Vec3::new(-2.0, 2.0, 1.0))
+        .lookat(Vec3::new(0.0, 0.0, -1.0))
+        .vup(Vec3::new(0.0, 1.0, 0.0))
+        .defocus_angle(10.0)
+        .focus_dist(3.4)
+        .build();
 
     let m_ground = Material::Lambertian(Lambertian {
         albedo: Vec3::new(0.8, 0.8, 0.0),
